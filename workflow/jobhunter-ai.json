@@ -1,0 +1,731 @@
+{
+  "name": "Jobhunter AI Agent",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 9
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        0,
+        -100
+      ],
+      "id": "98c6afe5-bfda-4f46-a53e-a113d7bf76f0",
+      "name": "Daily 09:00 Trigger"
+    },
+    {
+      "parameters": {
+        "url": "https://www.arbeitnow.com/api/job-board-api",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        224,
+        40
+      ],
+      "id": "33041c67-e46b-4a7c-a51f-caf82c628d7a",
+      "name": "Fetch Arbeitnow Jobs"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "data",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        448,
+        40
+      ],
+      "id": "731b3c1a-dc0f-4907-8cac-9a2a872e7407",
+      "name": "Split Arbeitnow Jobs"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "d6dcd7d6-4dc3-4b22-996e-d47911280c90",
+              "leftValue": "={{ $json.remote === true }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        672,
+        40
+      ],
+      "id": "ed20c8e2-9115-449d-892d-40fe7dfc6342",
+      "name": "Remote Only"
+    },
+    {
+      "parameters": {
+        "jsCode": "const sevenDaysAgo = Date.now() - (7 * 24 * 60 * 60 * 1000);\n\nreturn $input.all().filter(item => {\n  const createdAt = Number(item.json.created_at) * 1000;\n\n  return Number.isFinite(createdAt) &&\n         createdAt >= sevenDaysAgo &&\n         createdAt <= Date.now();\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        896,
+        40
+      ],
+      "id": "a6d5243a-5384-4b9a-aebd-498e7f3dbc82",
+      "name": "Posted Within 7 Days"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "128778a0-f959-4005-bc26-a93ff5aa5ac9",
+              "leftValue": "={{ (String($json.title || '') + ' ' + String($json.description || '')).toLowerCase() }}",
+              "rightValue": "(helpdesk|service desk|it support|technical support|tech support|first level support|1st level support|customer support|customer service|customer care|call center|call centre|inbound|email support|chat support)",
+              "operator": {
+                "type": "string",
+                "operation": "regex"
+              }
+            },
+            {
+              "id": "a115c5cf-cd4b-4ccd-8fa5-c64618078fe8",
+              "leftValue": "={{ String($json.title || '').toLowerCase() }}",
+              "rightValue": "(sales|account executive|account manager|business development|sales manager|sales representative)",
+              "operator": {
+                "type": "string",
+                "operation": "notRegex"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        1120,
+        40
+      ],
+      "id": "c868f738-011a-46ac-b37e-e3eecacadb27",
+      "name": "Support Roles Without Sales"
+    },
+    {
+      "parameters": {
+        "url": "https://remotive.com/api/remote-jobs",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        224,
+        -240
+      ],
+      "id": "e688ad98-83fb-4c67-be8c-542ef9c9e650",
+      "name": "Fetch Remotive Jobs"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "jobs",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        448,
+        -240
+      ],
+      "id": "2b6daccd-bcde-4727-a671-cd05a8ad1bea",
+      "name": "Split Remotive Jobs"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "b858719a-41ef-4240-8b8a-aa8d1760fd39",
+              "name": "source",
+              "value": "remotive",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        672,
+        -240
+      ],
+      "id": "e6840005-c8ce-4fad-acbd-c6a21b250486",
+      "name": "Tag Source Remotive"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1344,
+        -100
+      ],
+      "id": "422858c5-2f61-4048-9670-1789a5c6fd10",
+      "name": "Combine Sources"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "8a8f4e4e-c24a-4b0a-bf48-30490cabef15",
+              "leftValue": "={{ String($json.title || '') }}",
+              "rightValue": "(helpdesk|service desk|it support|technical support|tech support|first level support|1st level support|customer support|customer service|customer care|call center|call centre|inbound|email support|e-mail support|chat support)",
+              "operator": {
+                "type": "string",
+                "operation": "regex"
+              }
+            },
+            {
+              "id": "92b41a9a-84df-4266-bc14-d135eb1ff9a2",
+              "leftValue": "={{ String($json.candidate_required_location || $json.location || '') }}",
+              "rightValue": "italy",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "993c5fb0-5759-41e2-9492-c4639d4cb9a2",
+              "leftValue": "={{ String($json.candidate_required_location || $json.location || '') }}",
+              "rightValue": "europe",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "fb5aa6f9-816e-4848-9424-724986539a7b",
+              "leftValue": "={{ String($json.candidate_required_location || $json.location || '') }}",
+              "rightValue": "worldwide",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "53ac6edc-f07e-4567-ac16-18c0b9dc5300",
+              "leftValue": "={{ String($json.candidate_required_location || $json.location || '') }}",
+              "rightValue": "eu",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "e70eb4cd-e06f-4e7e-a8b9-be6227802296",
+              "leftValue": "={{ String($json.candidate_required_location || $json.location || '') }}",
+              "rightValue": "eea",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {
+          "ignoreCase": true
+        }
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        1568,
+        -100
+      ],
+      "id": "13f292c2-3ec4-4357-b4c5-41edb884e16d",
+      "name": "Support Title or Target Region"
+    },
+    {
+      "parameters": {
+        "jsCode": "const text = (value) => {\n  if (value === undefined || value === null) return '';\n  if (Array.isArray(value)) return value.map(text).filter(Boolean).join(', ');\n  if (typeof value === 'object') return '';\n  return String(value).trim();\n};\n\nconst toIsoDate = (value) => {\n  if (value === undefined || value === null || value === '') return '';\n  const numeric = Number(value);\n  if (!Number.isFinite(numeric)) return text(value);\n  const date = new Date(numeric * 1000);\n  return Number.isNaN(date.getTime()) ? '' : date.toISOString();\n};\n\nconst isHttpUrl = (value) => /^https?:\\/\\/\\S+$/i.test(value);\n\nreturn $input.all()\n  .map(item => ({\n    json: {\n      title: text(item.json.title),\n      company: text(item.json.company_name || item.json.company),\n      location: text(item.json.candidate_required_location || item.json.location),\n      salary: text(item.json.salary),\n      job_type: text(item.json.job_type || item.json.job_types),\n      language: text(item.json.language),\n      remote_region: text(item.json.candidate_required_location || item.json.location),\n      source: text(item.json.source) || 'arbeitnow',\n      date: toIsoDate(item.json.publication_date || item.json.created_at),\n      url: text(item.json.url)\n    }\n  }))\n  .filter(item => isHttpUrl(item.json.url));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1792,
+        -100
+      ],
+      "id": "0dbf6107-1cfd-4248-8127-47d67dfa9bc4",
+      "name": "Normalize Job Schema"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "73700663-6779-4331-89dc-7036cc214d2f",
+              "leftValue": "={{ $json.title }}",
+              "rightValue": "(helpdesk|service desk|it support|technical support|tech support|first level|1st level|customer support|customer service|customer care|kundenservice|kundendienst|call center|call centre|inbound|email support|e-mail support|chat support)",
+              "operator": {
+                "type": "string",
+                "operation": "regex"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {
+          "ignoreCase": true
+        }
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        2016,
+        -100
+      ],
+      "id": "99a1ef5e-4513-4b50-abad-d0ca1ec6b93e",
+      "name": "Support Title Check"
+    },
+    {
+      "parameters": {
+        "compare": "selectedFields",
+        "fieldsToCompare": "url",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.removeDuplicates",
+      "typeVersion": 2,
+      "position": [
+        2240,
+        -100
+      ],
+      "id": "62557e4e-6342-4d9b-9af7-697817b297b1",
+      "name": "Deduplicate by URL"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEET_ID",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "title": "={{ $json.title }}",
+            "company": "={{ $json.company }}",
+            "location": "={{ $json.location }}",
+            "salary": "={{ $json.salary || '' }}",
+            "job_type": "={{ $json.job_type || '' }}",
+            "language": "={{ $json.language || '' }}",
+            "remote_region": "={{ $json.remote_region || '' }}",
+            "source": "={{ $json.source || '' }}",
+            "date": "={{ $json.date || '' }}",
+            "url": "={{ $json.url }}"
+          },
+          "matchingColumns": [
+            "url"
+          ],
+          "schema": [
+            {
+              "id": "title",
+              "displayName": "title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "company",
+              "displayName": "company",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "location",
+              "displayName": "location",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "salary",
+              "displayName": "salary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "job_type",
+              "displayName": "job_type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "language",
+              "displayName": "language",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "remote_region",
+              "displayName": "remote_region",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "source",
+              "displayName": "source",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "date",
+              "displayName": "date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "url",
+              "displayName": "url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        2464,
+        -100
+      ],
+      "id": "fdfbf9cc-27eb-4b13-9b60-8974b5aa8ce2",
+      "name": "Upsert Jobs to Google Sheet"
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\n\nconst escapeHtml = (value) => String(value ?? '')\n  .replace(/&/g, '&amp;')\n  .replace(/</g, '&lt;')\n  .replace(/>/g, '&gt;')\n  .replace(/\"/g, '&quot;')\n  .replace(/'/g, '&#39;');\n\nconst safeUrl = (value) => {\n  const url = String(value || '').trim();\n  return /^https?:\\/\\//i.test(url) ? escapeHtml(url) : '';\n};\n\nlet html = `\n<h2>Jobhunter AI Agent – Neue Jobtreffer</h2>\n<p>Es wurden <strong>${items.length}</strong> passende Jobs gefunden.</p>\n<hr>\n`;\n\nitems.forEach((item, index) => {\n  const job = item.json;\n\n  const title = escapeHtml(job.title || job.name || 'Stellenangebot');\n  const url = safeUrl(job.url || job.link);\n  const company = escapeHtml(job.company || job.company_name || job.companyName || '');\n  const source = escapeHtml(job.source || '');\n\n  html += `\n    <h3>${index + 1}. ${title}</h3>\n    ${company ? `<p><strong>Unternehmen:</strong> ${company}</p>` : ''}\n    ${source ? `<p><strong>Quelle:</strong> ${source}</p>` : ''}\n    ${url ? `<p><a href=\"${url}\">Stellenanzeige öffnen</a></p>` : ''}\n    <hr>\n  `;\n});\n\nreturn [\n  {\n    json: {\n      subject: `Jobhunter AI Agent – ${items.length} neue Jobtreffer`,\n      html\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2688,
+        -100
+      ],
+      "id": "f222297a-934f-4337-9768-d1fdec13147b",
+      "name": "Build Email Digest"
+    },
+    {
+      "parameters": {
+        "fromEmail": "jobhunter@example.com",
+        "toEmail": "you@example.com",
+        "subject": "={{$json.subject}}",
+        "html": "={{$json.html}}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        2912,
+        -100
+      ],
+      "id": "72f13d61-8960-4a7f-854f-1f8e1abfe221",
+      "name": "Send Email Digest"
+    },
+    {
+      "parameters": {
+        "content": "## Jobhunter AI Agent – setup\n1. Create a **Google Sheets OAuth2** credential and select it in *Upsert Jobs to Google Sheet*.\n2. Replace `YOUR_GOOGLE_SHEET_ID` with your sheet ID. Row 1 needs the columns from `config/google-sheet-columns.csv`.\n3. Create an **SMTP** credential and select it in *Send Email Digest*. Replace the example addresses.\n4. Test manually, then publish/activate.",
+        "height": 260,
+        "width": 520
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -80,
+        220
+      ],
+      "id": "5d0c2f4e-7a39-4f0b-9a51-2f7f3c8e1a10",
+      "name": "Setup Notes"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Daily 09:00 Trigger": {
+      "main": [
+        [
+          {
+            "node": "Fetch Arbeitnow Jobs",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Fetch Remotive Jobs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Arbeitnow Jobs": {
+      "main": [
+        [
+          {
+            "node": "Split Arbeitnow Jobs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Arbeitnow Jobs": {
+      "main": [
+        [
+          {
+            "node": "Remote Only",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Remote Only": {
+      "main": [
+        [
+          {
+            "node": "Posted Within 7 Days",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Posted Within 7 Days": {
+      "main": [
+        [
+          {
+            "node": "Support Roles Without Sales",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Support Roles Without Sales": {
+      "main": [
+        [
+          {
+            "node": "Combine Sources",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Fetch Remotive Jobs": {
+      "main": [
+        [
+          {
+            "node": "Split Remotive Jobs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Remotive Jobs": {
+      "main": [
+        [
+          {
+            "node": "Tag Source Remotive",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tag Source Remotive": {
+      "main": [
+        [
+          {
+            "node": "Combine Sources",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Combine Sources": {
+      "main": [
+        [
+          {
+            "node": "Support Title or Target Region",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Support Title or Target Region": {
+      "main": [
+        [
+          {
+            "node": "Normalize Job Schema",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize Job Schema": {
+      "main": [
+        [
+          {
+            "node": "Support Title Check",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Support Title Check": {
+      "main": [
+        [
+          {
+            "node": "Deduplicate by URL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Deduplicate by URL": {
+      "main": [
+        [
+          {
+            "node": "Upsert Jobs to Google Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upsert Jobs to Google Sheet": {
+      "main": [
+        [
+          {
+            "node": "Build Email Digest",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Email Digest": {
+      "main": [
+        [
+          {
+            "node": "Send Email Digest",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "timezone": "Europe/Rome",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "tags": []
+}

@@ -1,0 +1,6 @@
+title,company,location,salary,job_type,language,remote_region,source,date,url
+"Customer Support Specialist – German","Example Remote Ltd","Europe","","full_time","","Europe","remotive","2026-10-10T08:15:00","https://example.com/jobs/r1"
+"Technical Support Engineer","Example Italia S.r.l.","Italy","EUR 30k - 36k","contract","","Italy","remotive","2026-10-12T07:30:00","https://example.com/jobs/shared"
+"IT Support Specialist (German speaking)","Example Systems GmbH","Berlin","","full time","","Berlin","arbeitnow","2026-10-11T08:00:00.000Z","https://example.com/jobs/a1"
+"Kundenservice Mitarbeiter (Remote)","Beispiel Versand GmbH","Deutschland","","full time","","Deutschland","arbeitnow","2026-10-12T08:00:00.000Z","https://example.com/jobs/a8"
+"Chat Support Agent <script>alert(1)</script>","Evil & Co <b>""quoted""","Remote","","full time, part time","","Remote","arbeitnow","2026-10-12T08:00:00.000Z","https://example.com/jobs/a9"

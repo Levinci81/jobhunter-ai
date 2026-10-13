@@ -1,0 +1,16 @@
+{
+  "name": "jobhunter-ai",
+  "version": "2.2.0",
+  "description": "n8n workflow that collects remote support and customer-service jobs from two public job APIs, filters and de-duplicates them, stores them in Google Sheets and sends a daily email digest.",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test tests/*.test.mjs",
+    "examples": "node scripts/render-examples.mjs"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "author": "Levinci81",
+  "license": "UNLICENSED"
+}

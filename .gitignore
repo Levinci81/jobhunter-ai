@@ -1,0 +1,24 @@
+# Dependencies and tooling
+node_modules/
+.npm/
+coverage/
+
+# Local environment and secrets
+.env
+.env.*
+!config/n8n.env.example
+*.pem
+*.key
+
+# Private n8n exports must never be committed (only workflow/jobhunter-ai.json is public)
+*.private.json
+JobHunter AI - Version*.json
+backup/
+exports/
+
+# OS and editor files
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/

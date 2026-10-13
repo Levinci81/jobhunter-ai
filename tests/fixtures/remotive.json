@@ -1,0 +1,83 @@
+{
+  "_comment": "Synthetic test data modelled on the public Remotive remote-jobs API response shape. All companies and URLs are fictitious.",
+  "job-count": 6,
+  "jobs": [
+    {
+      "_case": "R1 kept: support title, Europe",
+      "id": 1,
+      "url": "https://example.com/jobs/r1",
+      "title": "Customer Support Specialist – German",
+      "company_name": "Example Remote Ltd",
+      "category": "Customer Service",
+      "job_type": "full_time",
+      "publication_date": "2026-10-10T08:15:00",
+      "candidate_required_location": "Europe",
+      "salary": "",
+      "description": "<p>Help our customers.</p>"
+    },
+    {
+      "_case": "R2 dropped: passes region filter (Worldwide) but not the support title check",
+      "id": 2,
+      "url": "https://example.com/jobs/r2",
+      "title": "Data Engineer",
+      "company_name": "Example Data Inc",
+      "category": "Data",
+      "job_type": "full_time",
+      "publication_date": "2026-10-11T09:00:00",
+      "candidate_required_location": "Worldwide",
+      "salary": "",
+      "description": "<p>Pipelines.</p>"
+    },
+    {
+      "_case": "R3 kept: technical support, Italy",
+      "id": 3,
+      "url": "https://example.com/jobs/shared",
+      "title": "Technical Support Engineer",
+      "company_name": "Example Italia S.r.l.",
+      "category": "Customer Service",
+      "job_type": "contract",
+      "publication_date": "2026-10-12T07:30:00",
+      "candidate_required_location": "Italy",
+      "salary": "EUR 30k - 36k",
+      "description": "<p>Support.</p>"
+    },
+    {
+      "_case": "R4 dropped: neither support title nor target region",
+      "id": 4,
+      "url": "https://example.com/jobs/r4",
+      "title": "Account Executive",
+      "company_name": "Example Growth Inc",
+      "category": "Sales",
+      "job_type": "full_time",
+      "publication_date": "2026-10-12T10:00:00",
+      "candidate_required_location": "USA Only",
+      "salary": "",
+      "description": "<p>Sales.</p>"
+    },
+    {
+      "_case": "R5 dropped: duplicate URL of R1",
+      "id": 5,
+      "url": "https://example.com/jobs/r1",
+      "title": "Customer Support Specialist (DE)",
+      "company_name": "Example Remote Ltd",
+      "category": "Customer Service",
+      "job_type": "full_time",
+      "publication_date": "2026-10-10T08:15:00",
+      "candidate_required_location": "Europe",
+      "salary": "",
+      "description": "<p>Duplicate posting.</p>"
+    },
+    {
+      "_case": "R6 dropped without crashing: title missing, location is a number (unexpected API format)",
+      "id": 6,
+      "url": "https://example.com/jobs/r6",
+      "company_name": "Example Odd Data Ltd",
+      "category": "Customer Service",
+      "job_type": "full_time",
+      "publication_date": "2026-10-12T10:00:00",
+      "candidate_required_location": 42,
+      "salary": null,
+      "description": "<p>Malformed entry.</p>"
+    }
+  ]
+}
